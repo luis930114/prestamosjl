@@ -1,1 +1,109 @@
 prestamos-env
+# ==========================================
+# 🐍 Python + Django .gitignore
+# ==========================================
+
+# --- Entornos virtuales ---
+venv/
+env/
+ENV/
+.venv/
+.env/
+env.bak/
+venv.bak/
+
+# --- Archivos de configuración ---
+*.env
+*.env.local
+.envrc
+.secret
+config.json
+
+# --- Archivos de compilación de Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Archivos de logs ---
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+# --- Cobertura y testing ---
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.cache/
+coverage.xml
+nosetests.xml
+test-results/
+
+# --- Migraciones (solo si no se quieren versionar) ---
+# Descomenta si no deseas guardar migraciones automáticas
+# */migrations/*
+# !*/migrations/__init__.py
+
+# --- Django específico ---
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_root/
+build/
+dist/
+
+# --- Archivos de compilación / empaquetado ---
+*.egg
+*.egg-info/
+.eggs/
+MANIFEST
+pip-wheel-metadata/
+wheelhouse/
+
+# --- Documentación ---
+docs/_build/
+site/
+
+# --- IDEs y editores ---
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# --- Docker ---
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# --- Jupyter / IPython ---
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# --- Celery / Redis / Cache ---
+celerybeat-schedule
+celerybeat.pid
+__pycache__/
+*.sqlite3
+
+# --- Sistemas operativos ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Otros ---
+*.sqlite
+*.db
+*.mo
