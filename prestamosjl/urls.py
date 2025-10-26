@@ -14,17 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users import views as users_views
+from django.shortcuts import redirect
 from aplicacion import views as aplicacion_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('login/', users_views.login_view, name='login'),
     path('inicio/', aplicacion_views.inicio_view, name='inicio'),
-    path('logout/', users_views.logout_view, name='logout')
+
+     # Redirigir raíz al dashboard
+    path('', lambda request: redirect('loans:dashboard')),
+    
+    # Apps
+    path('usuarios/', include('users.urls')),  # Tu app de usuarios existente
+    path('prestamos/', include('loans.urls')),
+    path('pagos/', include('payments.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

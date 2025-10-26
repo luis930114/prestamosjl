@@ -1,0 +1,160 @@
+<!-- templates/loans/cliente_lista.html -->
+{% extends 'base.html' %}
+
+{% block title %}Clientes - Préstamos JL{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-people"></i> Lista de Clientes
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Header con búsqueda y botón -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <form method="get" class="d-flex gap-2">
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control" 
+                                       placeholder="Buscar por nombre, cédula o teléfono..."
+                                       value="{{ search }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+                                {% if search %}
+                                <a href="{% url 'loans:cliente_lista' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x"></i> Limpiar
+                                </a>
+                                {% endif %}
+                            </form>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="btn-group me-2">
+                                <a href="?estado=activos" 
+                                   class="btn btn-sm btn-outline-success {% if estado == 'activos' %}active{% endif %}">
+                                    Activos
+                                </a>
+                                <a href="?estado=inactivos" 
+                                   class="btn btn-sm btn-outline-secondary {% if estado == 'inactivos' %}active{% endif %}">
+                                    Inactivos
+                                </a>
+                                <a href="{% url 'loans:cliente_lista' %}" 
+                                   class="btn btn-sm btn-outline-primary {% if not estado %}active{% endif %}">
+                                    Todos
+                                </a>
+                            </div>
+                            <a href="{% url 'loans:cliente_crear' %}" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Nuevo Cliente
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de clientes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> 
+                        Total: {{ clientes.count }} cliente{{ clientes.count|pluralize }}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if clientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nombre Completo</th>
+                                        <th>Cédula</th>
+                                        <th>Celular</th>
+                                        <th>Préstamos Activos</th>
+                                        <th>Deuda Total</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cliente in clientes %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ cliente.nombre_completo }}</strong>
+                                            {% if not cliente.es_cliente_nuevo %}
+                                                <span class="badge bg-info ms-2">Cliente Antiguo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ cliente.cedula }}</td>
+                                        <td>
+                                            <i class="bi bi-phone"></i> {{ cliente.celular }}
+                                        </td>
+                                        <td>
+                                            {% if cliente.total_prestamos_activos > 0 %}
+                                                <span class="badge bg-primary">
+                                                    {{ cliente.total_prestamos_activos }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">0</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if cliente.deuda_total > 0 %}
+                                                <strong class="text-danger">
+                                                    ${{ cliente.deuda_total|floatformat:0 }}
+                                                </strong>
+                                            {% else %}
+                                                <span class="text-success">$0</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if cliente.activo %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactivo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'loans:cliente_detalle' cliente.pk %}" 
+                                                   class="btn btn-outline-primary"
+                                                   title="Ver detalle">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'loans:cliente_editar' cliente.pk %}" 
+                                                   class="btn btn-outline-warning"
+                                                   title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-3">No se encontraron clientes</p>
+                            {% if search %}
+                                <a href="{% url 'loans:cliente_lista' %}" class="btn btn-primary">
+                                    Ver todos los clientes
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

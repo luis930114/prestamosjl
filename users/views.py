@@ -9,6 +9,9 @@ from django.urls import reverse, reverse_lazy
 
 #Forms
 from users.forms import PrestamistaForm
+from users.models import Profile
+
+#from prestamosjl.loans.views import prestamo_lista
 
 def login_view(request):
     """ Login view. """
@@ -21,7 +24,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect('inicio')
+            return redirect('loans:dashboard')
         else:
             return render(request, 'users/login.html', {'error': 'invalid username and password'})
     return render(request, 'users/login.html')
@@ -30,17 +33,20 @@ def login_view(request):
 def logout_view(request):
     """ Logout a user. """
     logout(request)
-    return redirect('login')
+    return redirect('users:login')
 
 
 class PrestamistaView(FormView):
     """ Users sign up view."""
     template_name = 'users/signup1.html'
     form_class = PrestamistaForm
-    success_url = reverse_lazy('users:login')
+    #success_url = reverse_lazy('users:login')
+    success_url = reverse_lazy('loans:dashboard')
 
     def form_valid(self, form):
         """ Save form data. """
+
         form.save()
         return super().form_valid(form)
+
 

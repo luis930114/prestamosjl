@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Préstamos JL{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-speedometer2"></i> Dashboard General
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="stat-label mb-1">Total Prestado</p>
+                            <h2 class="stat-value text-primary">
+                                ${{ stats.total_prestado|floatformat:0 }}
+                            </h2>
+                        </div>
+                        <div class="fs-1 text-primary opacity-25">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="stat-label mb-1">Saldo Pendiente</p>
+                            <h2 class="stat-value text-success">
+                                ${{ stats.saldo_pendiente|floatformat:0 }}
+                            </h2>
+                        </div>
+                        <div class="fs-1 text-success opacity-25">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="stat-label mb-1">Préstamos Activos</p>
+                            <h2 class="stat-value text-warning">{{ stats.prestamos_activos }}</h2>
+                        </div>
+                        <div class="fs-1 text-warning opacity-25">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="stat-label mb-1">En Mora</p>
+                            <h2 class="stat-value text-danger">{{ stats.prestamos_mora }}</h2>
+                        </div>
+                        <div class="fs-1 text-danger opacity-25">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-lightning-charge"></i> Acciones Rápidas
+                    </h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'loans:prestamo_crear' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nuevo Préstamo
+                        </a>
+                        <a href="{% url 'loans:cliente_crear' %}" class="btn btn-success">
+                            <i class="bi bi-person-plus"></i> Nuevo Cliente
+                        </a>
+                        <a href="{% url 'payments:pago_rapido' %}" class="btn btn-info">
+                            <i class="bi bi-cash"></i> Registrar Pago
+                        </a>
+                        <a href="{% url 'loans:prestamo_simular' %}" class="btn btn-secondary">
+                            <i class="bi bi-calculator"></i> Simular Préstamo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        
+        <!-- Préstamos Recientes -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Préstamos Recientes
+                    </h5>
+                    <a href="{% url 'loans:prestamo_lista' %}" class="btn btn-sm btn-outline-primary">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if prestamos_recientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Cliente</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prestamo in prestamos_recientes %}
+                                    <tr onclick="window.location='{% url 'loans:prestamo_detalle' prestamo.pk %}'" style="cursor: pointer;">
+                                        <td><strong>{{ prestamo.codigo }}</strong></td>
+                                        <td>{{ prestamo.cliente.nombre_completo }}</td>
+                                        <td>${{ prestamo.valor_inicial|floatformat:0 }}</td>
+                                        <td>
+                                            {% if prestamo.estado == 'ACTIVO' %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% elif prestamo.estado == 'MORA' %}
+                                                <span class="badge bg-danger">Mora</span>
+                                            {% elif prestamo.estado == 'VENCIDO' %}
+                                                <span class="badge bg-warning">Vencido</span>
+                                            {% elif prestamo.estado == 'PAGADO' %}
+                                                <span class="badge bg-info">Pagado</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-2">No hay préstamos recientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Préstamos por Vencer -->
+        <div class="col-lg-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-alarm"></i> Próximos a Vencer (7 días)
+                    </h5>
+                    <a href="{% url 'loans:prestamos_vencer' %}" class="btn btn-sm btn-outline-warning">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if prestamos_vencer %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Saldo</th>
+                                        <th>Vence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prestamo in prestamos_vencer %}
+                                    <tr onclick="window.location='{% url 'loans:prestamo_detalle' prestamo.pk %}'" style="cursor: pointer;">
+                                        <td>{{ prestamo.cliente.nombre_completo }}</td>
+                                        <td>${{ prestamo.saldo_actual|floatformat:0 }}</td>
+                                        <td>
+                                            <small class="text-warning">
+                                                <i class="bi bi-calendar-event"></i>
+                                                {{ prestamo.fecha_vencimiento|date:"d/m/Y" }}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-check-circle fs-1"></i>
+                            <p class="mt-2">No hay préstamos por vencer</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Préstamos en Mora -->
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Préstamos en Mora
+                    </h5>
+                    <a href="{% url 'loans:prestamos_mora' %}" class="btn btn-sm btn-outline-danger">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if prestamos_mora %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Saldo</th>
+                                        <th>Días Mora</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prestamo in prestamos_mora %}
+                                    <tr onclick="window.location='{% url 'loans:prestamo_detalle' prestamo.pk %}'" style="cursor: pointer;">
+                                        <td>{{ prestamo.cliente.nombre_completo }}</td>
+                                        <td>${{ prestamo.saldo_actual|floatformat:0 }}</td>
+                                        <td>
+                                            <span class="badge bg-danger">
+                                                {{ prestamo.dias_mora }} días
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-check-circle fs-1 text-success"></i>
+                            <p class="mt-2">¡No hay préstamos en mora!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Deudores -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people"></i> Clientes con Mayor Deuda
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if clientes_deuda %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Préstamos</th>
+                                        <th class="text-end">Deuda Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cliente in clientes_deuda %}
+                                    <tr onclick="window.location='{% url 'loans:cliente_detalle' cliente.pk %}'" style="cursor: pointer;">
+                                        <td>{{ cliente.nombre_completo }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ cliente.total_prestamos_activos }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-danger">
+                                                ${{ cliente.deuda|floatformat:0 }}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-emoji-smile fs-1"></i>
+                            <p class="mt-2">No hay deudas pendientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}
