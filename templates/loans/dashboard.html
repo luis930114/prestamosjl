@@ -188,7 +188,9 @@
                                 </thead>
                                 <tbody>
                                     {% for prestamo in prestamos_vencer %}
+                                    {% if prestamo.pk %}
                                     <tr onclick="window.location='{% url 'loans:prestamo_detalle' prestamo.pk %}'" style="cursor: pointer;">
+                                    {% endif %}
                                         <td>{{ prestamo.cliente.nombre_completo }}</td>
                                         <td>${{ prestamo.saldo_actual|floatformat:0 }}</td>
                                         <td>

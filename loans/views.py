@@ -26,26 +26,30 @@ def dashboard(request):
     # Estadísticas generales
     prestamos = Prestamo.objects.filter(prestamista=prestamista)
     from django.db.models import Sum
-    stats = {
-        'total_prestamos': prestamos.count(),
-        'prestamos_activos': prestamos.filter(estado='ACTIVO').count(),
-        'prestamos_mora': prestamos.filter(estado='MORA').count(),
-        'prestamos_vencidos': prestamos.filter(estado='VENCIDO').count(),
-        'prestamos_pagados': prestamos.filter(estado='PAGADO').count(),
+    print("prestamos_activos:", Prestamo.objects.filter(estado='ACTIVO').count())
+    print("prestamos_recientes:", Prestamo.objects.all().order_by('-created_at')[:5])
 
-        'total_prestado': prestamos.aggregate(Sum('saldo_actual'))['saldo_actual__sum'] or 0,
-        'saldo_pendiente': prestamos.filter(
+    stats = {
+        'total_prestamos': Prestamo.objects.all().count(), #prestamos.count(),
+        'prestamos_activos': Prestamo.objects.filter(estado='ACTIVO').count(),
+        'prestamos_mora': Prestamo.objects.filter(estado='MORA').count(),
+        'prestamos_vencidos': Prestamo.objects.filter(estado='VENCIDO').count(),
+        'prestamos_pagados': Prestamo.objects.filter(estado='PAGADO').count(),
+
+        'total_prestado': sum(Prestamo.objects.all().values_list('saldo_actual', flat=True)), #prestamos.aggregate(Sum('saldo_actual'))['saldo_actual__sum'] or 0,
+        'saldo_pendiente': sum(Prestamo.objects.filter(
             estado__in=['ACTIVO', 'VENCIDO', 'MORA']
-        ).aggregate(Sum('saldo_actual'))['saldo_actual__sum'] or 0,
+        ).values_list('saldo_actual', flat=True)), #prestamos.filter(
+        #    estado__in=['ACTIVO', 'VENCIDO', 'MORA']   
         'total_clientes': Cliente.objects.filter(activo=True).count(),
     }
     
     # Préstamos recientes
-    prestamos_recientes = prestamos.order_by('-created_at')[:5]
+    prestamos_recientes = Prestamo.objects.all().order_by('-created_at')[:5]   #prestamos.order_by('-created_at')[:5]
     
     # Préstamos por vencer (próximos 7 días)
     fecha_limite = timezone.now().date() + timedelta(days=7)
-    prestamos_vencer = prestamos.filter(
+    prestamos_vencer = Prestamo.objects.filter(
         fecha_vencimiento__lte=fecha_limite,
         fecha_vencimiento__gte=timezone.now().date(),
         estado='ACTIVO'
@@ -76,7 +80,7 @@ def dashboard(request):
         'pagos_hoy': pagos_hoy,
         'prestamista': prestamista,
     }
-    
+    print(context)
     return render(request, 'loans/dashboard.html', context)
 
 
