@@ -1,0 +1,232 @@
+<!-- templates/loans/cliente_detalle.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ cliente.nombre_completo }} - Préstamos JL{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-person-circle"></i> {{ cliente.nombre_completo }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Información del Cliente -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge"></i> Información del Cliente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Nombre Completo</small>
+                        <strong>{{ cliente.nombre_completo }}</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Cédula</small>
+                        <strong>{{ cliente.cedula }}</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Celular</small>
+                        <a href="tel:{{ cliente.celular }}" class="text-decoration-none">
+                            <i class="bi bi-phone"></i> {{ cliente.celular }}
+                        </a>
+                        {% if cliente.celular_alternativo %}
+                            <br>
+                            <a href="tel:{{ cliente.celular_alternativo }}" class="text-decoration-none">
+                                <i class="bi bi-phone"></i> {{ cliente.celular_alternativo }}
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    {% if cliente.email %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Email</small>
+                        <a href="mailto:{{ cliente.email }}">
+                            <i class="bi bi-envelope"></i> {{ cliente.email }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Dirección Principal</small>
+                        <i class="bi bi-geo-alt"></i> {{ cliente.direccion_principal }}
+                    </div>
+                    
+                    {% if cliente.direccion_secundaria %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Dirección Secundaria</small>
+                        <i class="bi bi-geo-alt"></i> {{ cliente.direccion_secundaria }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Estado</small>
+                        {% if cliente.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                        
+                        {% if cliente.es_cliente_nuevo %}
+                            <span class="badge bg-info">Cliente Nuevo</span>
+                        {% endif %}
+                        
+                        {% if cliente.historial_pagos_completo %}
+                            <span class="badge bg-success">Buen Pagador</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'loans:cliente_editar' cliente.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Editar Cliente
+                        </a>
+                        <a href="{% url 'loans:prestamo_crear' %}?cliente={{ cliente.pk }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nuevo Préstamo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Co-deudores -->
+            {% if codeudores %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-people"></i> Co-deudores
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for codeudor in codeudores %}
+                    <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <strong>{{ codeudor.nombre_completo }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            CC: {{ codeudor.cedula }}<br>
+                            Tel: {{ codeudor.celular }}<br>
+                            {{ codeudor.relacion }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+        <div class="col-lg-8">
+            
+            <!-- Estadísticas -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card primary">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-0">{{ stats.total_prestamos }}</h3>
+                            <small class="text-muted">Total Préstamos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card success">
+                        <div class="card-body text-center">
+                            <h3 class="text-success mb-0">{{ stats.prestamos_activos }}</h3>
+                            <small class="text-muted">Activos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card info">
+                        <div class="card-body text-center">
+                            <h3 class="text-info mb-0">{{ stats.prestamos_pagados }}</h3>
+                            <small class="text-muted">Pagados</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card danger">
+                        <div class="card-body text-center">
+                            <h3 class="text-danger mb-0">${{ stats.deuda_total|floatformat:0 }}</h3>
+                            <small class="text-muted">Deuda Total</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Préstamos del Cliente -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-wallet2"></i> Historial de Préstamos
+                    </h5>
+                    <a href="{% url 'loans:prestamo_crear' %}?cliente={{ cliente.pk }}" 
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> Nuevo
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if prestamos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Fecha</th>
+                                        <th>Monto Inicial</th>
+                                        <th>Saldo Actual</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prestamo in prestamos %}
+                                    <tr>
+                                        <td><strong>{{ prestamo.codigo }}</strong></td>
+                                        <td>{{ prestamo.fecha_prestamo|date:"d/m/Y" }}</td>
+                                        <td>${{ prestamo.valor_inicial|floatformat:0 }}</td>
+                                        <td>
+                                            <strong>${{ prestamo.saldo_actual|floatformat:0 }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if prestamo.estado == 'ACTIVO' %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% elif prestamo.estado == 'MORA' %}
+                                                <span class="badge bg-danger">Mora</span>
+                                            {% elif prestamo.estado == 'VENCIDO' %}
+                                                <span class="badge bg-warning">Vencido</span>
+                                            {% elif prestamo.estado == 'PAGADO' %}
+                                                <span class="badge bg-info">Pagado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'loans:prestamo_detalle' prestamo.pk %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-2">Este cliente no tiene préstamos aún</p>
+                            <a href="{% url 'loans:prestamo_crear' %}?cliente={{ cliente.pk }}" 
+                               class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Crear Primer Préstamo
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

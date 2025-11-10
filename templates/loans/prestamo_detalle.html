@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}Préstamo {{ prestamo.codigo }} - Sistema JL{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-wallet2"></i> Préstamo {{ prestamo.codigo }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="row">
+        
+        <!-- Información del Préstamo -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header {% if prestamo.estado == 'MORA' %}bg-danger{% elif prestamo.estado == 'ACTIVO' %}bg-success{% elif prestamo.estado == 'PAGADO' %}bg-info{% else %}bg-warning{% endif %} text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Información del Préstamo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Código</small>
+                        <h4 class="mb-0">{{ prestamo.codigo }}</h4>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Estado</small>
+                        {% if prestamo.estado == 'ACTIVO' %}
+                            <span class="badge bg-success fs-6">Activo</span>
+                        {% elif prestamo.estado == 'MORA' %}
+                            <span class="badge bg-danger fs-6">En Mora ({{ prestamo.dias_mora }} días)</span>
+                        {% elif prestamo.estado == 'VENCIDO' %}
+                            <span class="badge bg-warning fs-6">Vencido</span>
+                        {% elif prestamo.estado == 'PAGADO' %}
+                            <span class="badge bg-info fs-6">Pagado</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Cliente</small>
+                        <strong>
+                            <a href="{% url 'loans:cliente_detalle' prestamo.cliente.pk %}">
+                                {{ prestamo.cliente.nombre_completo }}
+                            </a>
+                        </strong>
+                        <br>
+                        <small>{{ prestamo.cliente.cedula }}</small>
+                        <br>
+                        <small><i class="bi bi-phone"></i> {{ prestamo.cliente.celular }}</small>
+                    </div>
+                    
+                    {% if prestamo.codeudor %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Co-deudor</small>
+                        <strong>{{ prestamo.codeudor.nombre_completo }}</strong>
+                        <br>
+                        <small>{{ prestamo.codeudor.cedula }} - {{ prestamo.codeudor.celular }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Prestamista</small>
+                        <strong>{{ prestamo.prestamista.nombre_completo }}</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Fecha del Préstamo</small>
+                        <strong>{{ prestamo.fecha_prestamo|date:"d/m/Y" }}</strong>
+                    </div>
+                    
+                    {% if prestamo.fecha_vencimiento %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Fecha de Vencimiento</small>
+                        <strong class="{% if prestamo.esta_en_mora %}text-danger{% endif %}">
+                            {{ prestamo.fecha_vencimiento|date:"d/m/Y" }}
+                        </strong>
+                        {% if prestamo.esta_en_mora %}
+                            <br><span class="badge bg-danger">{{ prestamo.dias_mora }} días de mora</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'loans:prestamo_editar' prestamo.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Editar Préstamo
+                        </a>
+                        {% if prestamo.estado != 'PAGADO' %}
+                        <a href="{% url 'payments:pago_rapido' %}?prestamo={{ prestamo.pk }}" class="btn btn-success">
+                            <i class="bi bi-cash"></i> Registrar Pago
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Letras/Documentos -->
+            {% if prestamo.letra_foto or prestamo.letra_foto_reverso %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-file-earmark-image"></i> Letra/Pagaré
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if prestamo.letra_foto %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Frente:</small>
+                        <a href="{{ prestamo.letra_foto.url }}" target="_blank">
+                            <img src="{{ prestamo.letra_foto.url }}" 
+                                 class="img-fluid rounded border" 
+                                 alt="Letra frente">
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if prestamo.letra_foto_reverso %}
+                    <div>
+                        <small class="text-muted d-block mb-2">Reverso:</small>
+                        <a href="{{ prestamo.letra_foto_reverso.url }}" target="_blank">
+                            <img src="{{ prestamo.letra_foto_reverso.url }}" 
+                                 class="img-fluid rounded border" 
+                                 alt="Letra reverso">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+        <!-- Detalles Financieros y Pagos -->
+        <div class="col-lg-8">
+            
+            <!-- Cards con Estadísticas -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card primary">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Valor Inicial</small>
+                            <h4 class="text-primary mb-0">
+                                ${{ prestamo.valor_inicial|floatformat:0 }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card stat-card danger">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Saldo Actual</small>
+                            <h4 class="text-danger mb-0">
+                                ${{ prestamo.saldo_actual|floatformat:0 }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card stat-card warning">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Interés Mensual</small>
+                            <h4 class="text-warning mb-0">
+                                ${{ prestamo.interes_mensual|floatformat:0 }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card stat-card success">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Pagado</small>
+                            <h4 class="text-success mb-0">
+                                ${{ totales.total_pagado|floatformat:0 }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen Financiero -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calculator"></i> Resumen Financiero
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td><strong>Valor del Préstamo:</strong></td>
+                                <td class="text-end">${{ prestamo.valor_inicial|floatformat:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Capital Pagado:</strong></td>
+                                <td class="text-end text-success">${{ prestamo.total_capital_pagado|floatformat:0 }}</td>
+                            </tr>
+                            <tr class="table-light">
+                                <td><strong>Saldo Pendiente:</strong></td>
+                                <td class="text-end"><strong class="text-danger">${{ prestamo.saldo_actual|floatformat:0 }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Intereses Pagados:</strong></td>
+                                <td class="text-end text-warning">${{ totales.total_intereses|floatformat:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Pagado al Prestamista:</strong></td>
+                                <td class="text-end"><strong>${{ totales.total_pagado|floatformat:0 }}</strong></td>
+                            </tr>
+                            <tr class="table-primary">
+                                <td><strong>Tasa de Interés:</strong></td>
+                                <td class="text-end"><strong>{{ prestamo.porcentaje_interes }}% mensual ({{ prestamo.get_tipo_interes_display }})</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Barra de Progreso -->
+                    <div class="mt-3">
+                        <small class="text-muted">Progreso del Pago:</small>
+                        <div class="progress" style="height: 25px;">
+                            {% widthratio prestamo.total_capital_pagado prestamo.valor_inicial 100 as progreso %}
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 aria-valuenow="{{ progreso }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ progreso }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historial de Pagos -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Historial de Pagos
+                    </h5>
+                    {% if prestamo.estado != 'PAGADO' %}
+                    <a href="{% url 'payments:pago_rapido' %}?prestamo={{ prestamo.pk }}" 
+                       class="btn btn-sm btn-success">
+                        <i class="bi bi-plus"></i> Nuevo Pago
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if pagos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Recibo</th>
+                                        <th>Fecha</th>
+                                        <th>Interés</th>
+                                        <th>Capital</th>
+                                        <th>Total</th>
+                                        <th>Método</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pago in pagos %}
+                                    <tr {% if pago.anulado %}class="table-secondary"{% endif %}>
+                                        <td>
+                                            <strong>{{ pago.recibo_numero }}</strong>
+                                            {% if pago.anulado %}
+                                                <br><span class="badge bg-danger">Anulado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ pago.fecha_pago|date:"d/m/Y" }}</td>
+                                        <td class="text-warning">${{ pago.valor_interes|floatformat:0 }}</td>
+                                        <td class="text-success">${{ pago.valor_capital|floatformat:0 }}</td>
+                                        <td><strong>${{ pago.valor_total|floatformat:0 }}</strong></td>
+                                        <td><small>{{ pago.get_metodo_pago_display }}</small></td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'payments:pago_detalle' pago.pk %}" 
+                                                   class="btn btn-outline-primary"
+                                                   title="Ver detalle">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                {% if not pago.anulado %}
+                                                <a href="{% url 'payments:pago_recibo_pdf' pago.pk %}" 
+                                                   class="btn btn-outline-success"
+                                                   target="_blank"
+                                                   title="Ver recibo">
+                                                    <i class="bi bi-file-pdf"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="2" class="text-end">TOTALES:</th>
+                                        <th class="text-warning">${{ totales.total_intereses|floatformat:0 }}</th>
+                                        <th class="text-success">${{ totales.total_capital|floatformat:0 }}</th>
+                                        <th><strong>${{ totales.total_pagado|floatformat:0 }}</strong></th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-2">No hay pagos registrados para este préstamo</p>
+                            <a href="{% url 'payments:pago_rapido' %}?prestamo={{ prestamo.pk }}" 
+                               class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Registrar Primer Pago
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Observaciones -->
+            {% if prestamo.observaciones %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-card-text"></i> Observaciones
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ prestamo.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}

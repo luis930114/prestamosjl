@@ -1,0 +1,135 @@
+<!-- templates/loans/cliente_form.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - Préstamos JL{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-person-plus"></i> {{ titulo }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ titulo }}</h5>
+                </div>
+                <div class="card-body">
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Información Personal -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-person"></i> Información Personal
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre *</label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                    <div class="text-danger small">{{ form.nombre.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellido *</label>
+                                {{ form.apellido }}
+                                {% if form.apellido.errors %}
+                                    <div class="text-danger small">{{ form.apellido.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Cédula *</label>
+                            {{ form.cedula }}
+                            {% if form.cedula.errors %}
+                                <div class="text-danger small">{{ form.cedula.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Información de Contacto -->
+                        <h6 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="bi bi-phone"></i> Información de Contacto
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Celular *</label>
+                                {{ form.celular }}
+                                {% if form.celular.errors %}
+                                    <div class="text-danger small">{{ form.celular.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Celular Alternativo</label>
+                                {{ form.celular_alternativo }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                        
+                        <!-- Direcciones -->
+                        <h6 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="bi bi-geo-alt"></i> Direcciones
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dirección Principal *</label>
+                            {{ form.direccion_principal }}
+                            {% if form.direccion_principal.errors %}
+                                <div class="text-danger small">{{ form.direccion_principal.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dirección Secundaria</label>
+                            {{ form.direccion_secundaria }}
+                        </div>
+                        
+                        <!-- Observaciones -->
+                        <h6 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="bi bi-card-text"></i> Información Adicional
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Observaciones</label>
+                            {{ form.observaciones }}
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            {{ form.activo }}
+                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                Cliente Activo
+                            </label>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <a href="{% url 'loans:cliente_lista' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Guardar Cliente
+                            </button>
+                        </div>
+                        
+                    </form>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+
