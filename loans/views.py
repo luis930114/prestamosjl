@@ -88,9 +88,20 @@ def dashboard(request):
 
 @login_required
 def cliente_lista(request):
-    """Lista de clientes con búsqueda y filtros"""
-    
-    clientes = Cliente.objects.all().order_by('apellido', 'nombre')
+    clientes = (
+        Cliente.objects.all()
+        .order_by('apellido', 'nombre')
+        .annotate(
+            total_prestamos_activos=Count(
+                'prestamos',
+                filter=Q(prestamos__estado='ACTIVO')
+            ),
+            deuda_total=Sum(
+                'prestamos__saldo_actual',
+                filter=Q(prestamos__estado='ACTIVO')
+            )
+        )
+    )
     
     # Búsqueda
     search = request.GET.get('search', '')
@@ -108,7 +119,13 @@ def cliente_lista(request):
         clientes = clientes.filter(activo=True)
     elif estado == 'inactivos':
         clientes = clientes.filter(activo=False)
-    
+
+    # Para depuración:
+    if clientes:
+        print("Cliente:", clientes[0])
+        print("Prestamos activos:", clientes[0].total_prestamos_activos)
+        print("Deuda total:", clientes[0].deuda_total)
+
     context = {
         'clientes': clientes,
         'search': search,
@@ -226,10 +243,10 @@ def codeudor_crear(request, cliente_pk):
 def prestamo_lista(request):
     """Lista de préstamos con filtros"""
     
-    """try:
-        prestamista = request.user.profile.prestamista
-    except:
-        prestamista = Prestamista.objects.first()"""
+    #try:
+    #    prestamista = request.user.profile.prestamista
+    #except:
+    #    prestamista = Prestamista.objects.first()
     
     #prestamos = Prestamo.objects.filter(prestamista=prestamista).select_related('cliente')
     prestamos = Prestamo.objects.all()
@@ -309,7 +326,6 @@ def prestamo_crear(request):
             messages.success(request, f'Préstamo {prestamo.codigo} creado exitosamente')
             return redirect('loans:prestamo_detalle', pk=prestamo.pk)
     else:
-        # Pre-llenar prestamista
         try:
             prestamista = request.user.profile.prestamista
             form = PrestamoForm(initial={'prestamista': prestamista})

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Pago Rápido{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Mensajes de Django -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <!-- Columna izquierda: Formulario de pago -->
+    <div class="col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Pago Rápido</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="prestamo_id" class="form-label">Seleccionar préstamo</label>
+              <select class="form-select" id="prestamo_id" name="prestamo_id" required>
+                <option value="">-- Seleccione un préstamo --</option>
+                {% for prestamo in prestamos_activos %}
+                  <option value="{{ prestamo.id }}">
+                    {{ prestamo.cliente.nombre }} - {{ prestamo.monto_total|intcomma }} (Saldo: {{ prestamo.saldo_actual|intcomma }})
+                  </option>
+                {% empty %}
+                  <option disabled>No hay préstamos activos</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="valor_total" class="form-label">Valor total del pago</label>
+              <input type="number" class="form-control" name="valor_total" id="valor_total" min="1000" step="1000" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="metodo_pago" class="form-label">Método de pago</label>
+              <select class="form-select" id="metodo_pago" name="metodo_pago">
+                {% for key, label in metodos_pago %}
+                  <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">
+                Registrar Pago
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: Pagos del día -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Pagos del día</h5>
+          <span class="badge bg-light text-dark">
+            Total: ${{ total_hoy|intcomma }}
+          </span>
+        </div>
+        <div class="card-body table-responsive" style="max-height: 400px; overflow-y: auto;">
+          {% if pagos_hoy %}
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Préstamo</th>
+                  <th>Método</th>
+                  <th>Valor</th>
+                  <th>Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for pago in pagos_hoy %}
+                <tr>
+                  <td>{{ pago.prestamo.cliente.nombre }}</td>
+                  <td>#{{ pago.prestamo.id }}</td>
+                  <td>{{ pago.get_metodo_pago_display }}</td>
+                  <td>${{ pago.valor_total|intcomma }}</td>
+                  <td>{{ pago.created_at|time:"H:i" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="text-muted text-center my-3">No hay pagos registrados hoy.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -145,13 +145,13 @@ class Pago(models.Model):
         elif self.valor_capital > 0 and self.valor_interes == 0:
             self.tipo = 'CAPITAL'
         
-        is_new = not self.pk
+        #is_new = not self.pk
         
         super().save(*args, **kwargs)
         
         # Aplicar el pago al préstamo (solo si no está anulado y es nuevo)
-        if is_new and not self.anulado:
-            self.prestamo.aplicar_pago(self.valor_interes, self.valor_capital)
+        #if is_new and not self.anulado:
+        #    self.prestamo.aplicar_pago(self.valor_interes, self.valor_capital)
     
     def generar_recibo(self):
         """Genera un número único de recibo"""

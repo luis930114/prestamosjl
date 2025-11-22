@@ -230,7 +230,7 @@
                     <div class="mt-3">
                         <small class="text-muted">Progreso del Pago:</small>
                         <div class="progress" style="height: 25px;">
-                            {% widthratio prestamo.total_capital_pagado prestamo.valor_inicial 100 as progreso %}
+                            {% widthratio prestamo.saldo_actual prestamo.valor_inicial 100 as progreso %}
                             <div class="progress-bar bg-success" 
                                  role="progressbar" 
                                  aria-valuenow="{{ progreso }}" 
@@ -292,14 +292,7 @@
                                                    title="Ver detalle">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                {% if not pago.anulado %}
-                                                <a href="{% url 'payments:pago_recibo_pdf' pago.pk %}" 
-                                                   class="btn btn-outline-success"
-                                                   target="_blank"
-                                                   title="Ver recibo">
-                                                    <i class="bi bi-file-pdf"></i>
-                                                </a>
-                                                {% endif %}
+                                                
                                             </div>
                                         </td>
                                     </tr>

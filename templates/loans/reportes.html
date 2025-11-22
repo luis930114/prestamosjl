@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h2 class="mb-4">Reportes de Préstamos</h2>
+
+    <!-- FILTRO POR FECHAS -->
+    <form method="get" class="card shadow-sm p-4 mb-4">
+
+        <h5 class="mb-3">Filtrar por fechas</h5>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Fecha desde</label>
+                <input type="date" name="fecha_desde" 
+                       value="{{ fecha_desde }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Fecha hasta</label>
+                <input type="date" name="fecha_hasta" 
+                       value="{{ fecha_hasta }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Generar Reporte</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- RESULTADOS DEL REPORTE -->
+    {% if reporte %}
+        <div class="card shadow-sm p-4 mb-4">
+
+            <h4 class="mb-3">Resumen del período</h4>
+
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="border rounded p-3 mb-3">
+                        <small class="text-muted">Total préstamos</small>
+                        <h4 class="mt-1">{{ reporte.total_prestamos }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 mb-3">
+                        <small class="text-muted">Monto total</small>
+                        <h4 class="mt-1">${{ reporte.monto_total }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 mb-3">
+                        <small class="text-muted">Rango</small>
+                        <h5 class="mt-1">{{ reporte.fecha_desde }} → {{ reporte.fecha_hasta }}</h5>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- DETALLE POR ESTADOS -->
+        <div class="card shadow-sm p-4 mb-4">
+            <h4 class="mb-3">Préstamos por estado</h4>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Estado</th>
+                            <th>Cantidad</th>
+                            <th>Monto total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estado, data in reporte.por_estado.items %}
+                            <tr>
+                                <td>{{ estado }}</td>
+                                <td>{{ data.cantidad }}</td>
+                                <td>${{ data.monto }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- LISTA DE PRÉSTAMOS -->
+        <div class="card shadow-sm p-4">
+            <h4 class="mb-3">Detalle de préstamos</h4>
+
+            {% if prestamos %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Valor inicial</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in prestamos %}
+                                <tr>
+                                    <td>{{ p.codigo }}</td>
+                                    <td>{{ p.cliente }}</td>
+                                    <td>{{ p.fecha_prestamo }}</td>
+                                    <td>${{ p.valor_inicial }}</td>
+                                    <td>{{ p.estado }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <p class="text-muted">No hay préstamos en el rango seleccionado.</p>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <div class="alert alert-info mt-4">
+            Selecciona un rango de fechas para generar un reporte.
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

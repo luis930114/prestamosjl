@@ -34,13 +34,18 @@
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="btn-group me-2">
-                                <a href="?estado=activos" 
-                                   class="btn btn-sm btn-outline-success {% if estado == 'activos' %}active{% endif %}">
+                                
+                                <a href="?estado=ACTIVO" 
+                                   class="btn btn-sm btn-outline-success {% if estado == 'ACTIVO' %}active{% endif %}">
                                     Activos
                                 </a>
-                                <a href="?estado=inactivos" 
-                                   class="btn btn-sm btn-outline-secondary {% if estado == 'inactivos' %}active{% endif %}">
-                                    Inactivos
+                                <a href="?estado=PAGADO" 
+                                   class="btn btn-sm btn-outline-secondary {% if estado == 'PAGADO' %}active{% endif %}">
+                                    PAGADOS
+                                </a>
+                                <a href="?estado=VENCIDO" 
+                                   class="btn btn-sm btn-outline-secondary {% if estado == 'VENCIDO' %}active{% endif %}">
+                                    Vencidos
                                 </a>
                                 <a href="{% url 'loans:prestamo_lista' %}" 
                                    class="btn btn-sm btn-outline-primary {% if not estado %}active{% endif %}">
@@ -73,7 +78,6 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Código</th>
                                         <th>Valor del Préstamo</th>
                                         <th>Cliente</th>
                                         <th>Prestamista</th>
@@ -87,22 +91,14 @@
                                 <tbody>
                                     {% for prestamo in prestamos %}
                                     <tr>
-                                        <td>{{ prestamo.codigo }}</td>
                                         <td>
-                                            <strong>{{ prestamo.valor_inicial|floatformat:0 }}</strong>
+                                            <strong>${{ prestamo.valor_inicial|floatformat:0 }}</strong>
                                         </td>
                                         <td>{{ prestamo.cliente.nombre_completo }}</td>
                                         <td>{{ prestamo.prestamista.nombre_completo }}</td>
                                         <td>{{ prestamo.fecha_prestamo|date:"d/m/Y" }}</td>
                                         <td>{{ prestamo.saldo_actual|floatformat:0 }}</td>
-                                        <td>
-                                            {% if prestamo.cliente.total_prestamos_activos > 0 %}
-                                                <span class="badge bg-primary">
-                                                    {{ prestamo.cliente.total_prestamos_activos }}
-                                                </span>
-                                            {% else %}
-                                                <span class="text-muted">0</span>
-                                            {% endif %}
+                                        <td>{{ prestamo.saldo_actual|floatformat:0 }}
                                         </td>
                                     
                                         <td class="text-center">

@@ -154,10 +154,17 @@ def pago_rapido(request):
                 fecha_pago=timezone.now().date(),
                 created_by=request.user
             )
+            # Cerrar préstamo si quedó pagado
+            prestamo.refresh_from_db()
+
+            if prestamo.saldo_actual <= 0:
+                prestamo.saldo_actual = 0
+                prestamo.estado = "PAGADO"
+                prestamo.save(update_fields=["saldo_actual", "estado"])
             
             messages.success(
                 request,
-                f'✅ Pago registrado: {pago.recibo_numero} - ${valor_total:,.0f}'
+                f'Pago registrado: {pago.recibo_numero} - ${valor_total:,.0f}'
             )
             
             # Redirigir al recibo

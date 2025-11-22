@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">Lista de Pagos</h2>
+
+    <!-- Filtros -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Buscar por cliente o recibo...">
+        </div>
+
+        <div class="col-md-2">
+            <select name="metodo" class="form-select">
+                <option value="">Todos los métodos</option>
+                {% for key, label in metodos_pago %}
+                    <option value="{{ key }}" {% if metodo == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="form-control" placeholder="Desde">
+        </div>
+
+        <div class="col-md-2">
+            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="form-control" placeholder="Hasta">
+        </div>
+
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Filtrar</button>
+            <a href="{% url 'payments:pago_lista' %}" class="btn btn-outline-secondary flex-grow-1">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- Totales -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>💰 Totales</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total Recaudado:</span> 
+                    <strong>${{ totales.total_recaudado|default:0|floatformat:2 }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total Intereses:</span> 
+                    <strong>${{ totales.total_intereses|default:0|floatformat:2 }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total Capital:</span> 
+                    <strong>${{ totales.total_capital|default:0|floatformat:2 }}</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tabla de pagos -->
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Recibo</th>
+                    <th>Cliente</th>
+                    <th>Préstamo</th>
+                    <th>Fecha Pago</th>
+                    <th>Método</th>
+                    <th>Capital</th>
+                    <th>Interés</th>
+                    <th>Total</th>
+                    <th>Creado por</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in pagos %}
+                <tr>
+                    <td>{{ pago.recibo_numero }}</td>
+                    <td>{{ pago.prestamo.cliente.nombre }} {{ pago.prestamo.cliente.apellido }}</td>
+                    <td>{{ pago.prestamo.codigo }}</td>
+                    <td>{{ pago.fecha_pago }}</td>
+                    <td>{{ pago.get_metodo_pago_display }}</td>
+                    <td>${{ pago.valor_capital|floatformat:2 }}</td>
+                    <td>${{ pago.valor_interes|floatformat:2 }}</td>
+                    <td><strong>${{ pago.valor_total|floatformat:2 }}</strong></td>
+                    <td>{{ pago.created_by }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">No se encontraron pagos con los filtros seleccionados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
